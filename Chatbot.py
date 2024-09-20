@@ -3,7 +3,8 @@ import streamlit as st
 
 st.title("ChatGPT-like clone")
 
-client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# Inicializa el cliente de OpenAI con la clave de API
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-3.5-turbo"
@@ -11,18 +12,21 @@ if "openai_model" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Muestra los mensajes existentes
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# Procesa la entrada del usuario
 if prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # Genera la respuesta del asistente
     with st.chat_message("assistant"):
         response = ""
-        stream = client.ChatCompletion.create(
+        stream = openai.ChatCompletion.create(
             model=st.session_state["openai_model"],
             messages=[
                 {"role": m["role"], "content": m["content"]}
@@ -34,12 +38,3 @@ if prompt := st.chat_input("What is up?"):
             response += chunk["choices"][0]["delta"]["content"]
             st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
-    #agregado recientemente
-    client = OpenAI(api_key=openai_api_key)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
-    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
-    msg = response.choices[0].message.content
-    st.session_state.messages.append({"role": "assistant", "content": msg})
-    st.chat_message("assistant").write(msg)
-
