@@ -1,33 +1,51 @@
 import streamlit as st
-import anthropic
+from groq import Groq, GroqError
 
 with st.sidebar:
-    anthropic_api_key = st.text_input("Anthropic API Key", key="file_qa_api_key", type="password")
+    groq_api_key = st.text_input("Groq API Key", key="file_qa_api_key", type="password")
     "[View the source code](https://github.com/streamlit/llm-examples/blob/main/pages/1_File_Q%26A.py)"
     "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
 
-st.title("📝 File Q&A with Anthropic")
+st.title("📝 File Q&A with Groq")
+
+# Subir archivo de texto
 uploaded_file = st.file_uploader("Upload an article", type=("txt", "md"))
+
+# Pregunta relacionada al archivo
 question = st.text_input(
     "Ask something about the article",
     placeholder="Can you give me a short summary?",
     disabled=not uploaded_file,
 )
 
-if uploaded_file and question and not anthropic_api_key:
-    st.info("Please add your Anthropic API key to continue.")
+# Si se sube el archivo y hay una pregunta, pero falta la clave API
+if uploaded_file and question and not groq_api_key:
+    st.info("Please add your Groq API key to continue.")
+    st.stop()
 
-if uploaded_file and question and anthropic_api_key:
+# Si hay archivo, pregunta y clave API, entonces procede
+if uploaded_file and question and groq_api_key:
+    # Leer el archivo y decodificarlo
     article = uploaded_file.read().decode()
-    prompt = f"""{anthropic.HUMAN_PROMPT} Here's an article:\n\n<article>
-    {article}\n\n</article>\n\n{question}{anthropic.AI_PROMPT}"""
+    
+    # Construir el prompt que se enviará a la API de Groq
+    prompt = f"""Here is an article:\n\n{article}\n\nQuestion: {question}"""
 
-    client = anthropic.Client(api_key=anthropic_api_key)
-    response = client.completions.create(
-        prompt=prompt,
-        stop_sequences=[anthropic.HUMAN_PROMPT],
-        model="claude-v1",  # "claude-2" for Claude 2 model
-        max_tokens_to_sample=100,
-    )
-    st.write("### Answer")
-    st.write(response.completion)
+    # Inicializar el cliente de Groq con la clave API
+    client = Groq(api_key=groq_api_key)
+
+    try:
+        # Realizar la solicitud a la API de Groq
+        response = client.chat.completions.create(
+            model="mixtral-8x7b-32768",  # Cambia el modelo si es necesario
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens_to_sample=100,  # Limitar la cantidad de tokens en la respuesta
+        )
+
+        # Mostrar la respuesta del chatbot
+        st.write("### Answer")
+        st.write(response['choices'][0]['message']['content'])
+
+    except GroqError as e:
+        # Manejar posibles errores al hacer la solicitud
+        st.error(f"Error en la solicitud: {e}")
