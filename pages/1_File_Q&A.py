@@ -38,8 +38,7 @@ if uploaded_file and question and groq_api_key:
         # Realizar la solicitud a la API de Groq
         response = client.chat.completions.create(
             model="mixtral-8x7b-32768",  # Cambia el modelo si es necesario
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens_to_sample=100,  # Limitar la cantidad de tokens en la respuesta
+            messages=[{"role": "user", "content": prompt}]
         )
 
         # Mostrar la respuesta del chatbot
