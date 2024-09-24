@@ -2,6 +2,7 @@ import os
 from groq import Groq  # Importar la librería de GroqCloud
 import streamlit as st
 
+
 # Crear la barra lateral para ingresar la clave API
 with st.sidebar:
     groq_api_key = st.text_input("GroqCloud API Key", key="chatbot_api_key", type="password")
