@@ -27,7 +27,7 @@ if uploaded_file and question and not groq_api_key:
 if uploaded_file and question and groq_api_key:
     # Leer el archivo y decodificarlo
     article = uploaded_file.read().decode()
-    
+
     # Construir el prompt que se enviará a la API de Groq
     prompt = f"""Here is an article:\n\n{article}\n\nQuestion: {question}"""
 
@@ -41,10 +41,14 @@ if uploaded_file and question and groq_api_key:
             messages=[{"role": "user", "content": prompt}]
         )
 
+        # Acceder al contenido de la respuesta sin usar índices
+        completion_text = response.message.content
+
         # Mostrar la respuesta del chatbot
         st.write("### Answer")
-        st.write(response['choices'][0]['message']['content'])
+        st.write(completion_text)
 
     except GroqError as e:
         # Manejar posibles errores al hacer la solicitud
         st.error(f"Error en la solicitud: {e}")
+
