@@ -1,6 +1,7 @@
 import streamlit as st
 from groq import Groq, GroqError
 
+# Configurar la clave API en la barra lateral
 with st.sidebar:
     groq_api_key = st.text_input("Groq API Key", key="file_qa_api_key", type="password")
     "[View the source code](https://github.com/streamlit/llm-examples/blob/main/pages/1_File_Q%26A.py)"
@@ -18,12 +19,11 @@ question = st.text_input(
     disabled=not uploaded_file,
 )
 
-# Si se sube el archivo y hay una pregunta, pero falta la clave API
+# Verificar si hay archivo, pregunta y clave API
 if uploaded_file and question and not groq_api_key:
     st.info("Please add your Groq API key to continue.")
     st.stop()
 
-# Si hay archivo, pregunta y clave API, entonces procede
 if uploaded_file and question and groq_api_key:
     # Leer el archivo y decodificarlo
     article = uploaded_file.read().decode()
@@ -41,10 +41,14 @@ if uploaded_file and question and groq_api_key:
             messages=[{"role": "user", "content": prompt}]
         )
 
-        # Imprimir la estructura completa de la respuesta para inspección
-        st.write("### Raw Response")
-        st.write(response)
+        # Acceder al contenido de la respuesta generada
+        completion_text = response.choices[0].message.content
+
+        # Mostrar la respuesta en la interfaz de Streamlit
+        st.write("### Answer")
+        st.write(completion_text)
 
     except GroqError as e:
         # Manejar posibles errores al hacer la solicitud
         st.error(f"Error en la solicitud: {e}")
+
