@@ -41,14 +41,10 @@ if uploaded_file and question and groq_api_key:
             messages=[{"role": "user", "content": prompt}]
         )
 
-        # Acceder al contenido de la respuesta sin usar índices
-        completion_text = response.message.content
-
-        # Mostrar la respuesta del chatbot
-        st.write("### Answer")
-        st.write(completion_text)
+        # Imprimir la estructura completa de la respuesta para inspección
+        st.write("### Raw Response")
+        st.write(response)
 
     except GroqError as e:
         # Manejar posibles errores al hacer la solicitud
         st.error(f"Error en la solicitud: {e}")
-
